@@ -1,5 +1,19 @@
+@font-face {
+  font-family: "Myriad Pro";
+  src: url("/assets/fonts/MyriadPro-Regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Myriad Pro";
+  src: url("/assets/fonts/MyriadPro-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
 :root { --thaco-blue: #00529c; --page-bg: #f4f7fb; }
-body { min-height: 100vh; background: var(--page-bg); color: #1c2733; }
+body { min-height: 100vh; background: var(--page-bg); color: #1c2733; font-family: "Myriad Pro", "Segoe UI", Arial, sans-serif; }
 .login-view { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
 .login-card { width: min(100%, 440px); border-radius: 1rem; }
 .brand { color: var(--thaco-blue); font-weight: 800; letter-spacing: .06em; }

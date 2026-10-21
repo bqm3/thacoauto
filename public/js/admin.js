@@ -3,14 +3,15 @@
 const DEFAULTS = {
   slug: '', name: '', sheetUrl: '', sheetName: 'LichHen', mode: 'auto', pageSize: 6,
   minRowH: 70, interval: 10, refresh: 60, anim: 'slide', dateMode: 'today', date: '',
-  sortTime: true, title: 'KHÁCH HÀNG ĐẶT LỊCH HẸN', dateLabel: 'NGÀY:', logo: '', fontScale: 1,
+  sortTime: true, title: 'KHÁCH HÀNG ĐẶT LỊCH HẸN', dateLabel: 'NGÀY:', logo: '',
+  titleFontSize: 48, dateFontSize: 31, dataFontSize: 24,
   colorHead: '#4472c4', color1: '#cfd5ea', color2: '#e9ebf5', colorText: '#00529c',
   colorTitle: '#ff0000', emptyMessage: 'Hôm nay chưa có lịch hẹn',
   loadErrorMessage: 'Không thể tải dữ liệu từ Google Sheet'
 };
 
 const fields = Object.keys(DEFAULTS);
-const numberFields = new Set(['pageSize', 'minRowH', 'interval', 'refresh', 'fontScale']);
+const numberFields = new Set(['pageSize', 'minRowH', 'interval', 'refresh', 'titleFontSize', 'dateFontSize', 'dataFontSize']);
 const loginView = document.querySelector('#loginView');
 const dashboardView = document.querySelector('#dashboardView');
 const screenList = document.querySelector('#screenList');

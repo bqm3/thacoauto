@@ -139,7 +139,11 @@ function applyTheme() {
   style.setProperty('--row-color-2', config.color2);
   style.setProperty('--text-color', config.colorText);
   style.setProperty('--title-color', config.colorTitle);
-  $('#logo').innerHTML = config.logo ? `<img src="${escapeHtml(config.logo)}" alt="Logo">` : 'THACO AUTO';
+  style.setProperty('--title-font-size', `${Number(config.titleFontSize) || 48}px`);
+  style.setProperty('--date-font-size', `${Number(config.dateFontSize) || 31}px`);
+  style.setProperty('--data-font-size', `${Number(config.dataFontSize) || 24}px`);
+  const logoUrl = config.logo || '/assets/image/LOGO-THACO-AUTO-white.png';
+  $('#logo').innerHTML = `<img src="${escapeHtml(logoUrl)}" alt="THACO AUTO">`;
   $('#title').textContent = config.title;
 }
 
@@ -149,11 +153,9 @@ function calculatePageSize() {
     ? Math.max(1, Number(config.pageSize) || 6)
     : Math.max(1, Math.floor(bodyHeight / Math.max(30, Number(config.minRowH) || 70)));
   const rowHeight = bodyHeight / size;
-  const scale = Number(config.fontScale) || 1;
   const style = document.documentElement.style;
   style.setProperty('--row-height', `${rowHeight}px`);
-  style.setProperty('--font-size', `${Math.min(rowHeight * .3, innerWidth * .016) * scale}px`);
-  style.setProperty('--heading-font-size', `${Math.min(bodyHeight * .045, innerWidth * .016) * scale}px`);
+  style.setProperty('--heading-font-size', `${Math.min(bodyHeight * .045, innerWidth * .016)}px`);
   return size;
 }
 

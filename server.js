@@ -15,13 +15,15 @@ const SESSION_AGE = 12 * 60 * 60 * 1000;
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml'
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml',
+  '.otf': 'font/otf'
 };
 
 const DEFAULT_SCREEN = {
   slug: '', name: '', sheetUrl: '', sheetName: 'LichHen', mode: 'auto', pageSize: 6,
   minRowH: 70, interval: 10, refresh: 60, anim: 'slide', dateMode: 'today', date: '',
-  sortTime: true, title: 'KHÁCH HÀNG ĐẶT LỊCH HẸN', dateLabel: 'NGÀY:', logo: '', fontScale: 1,
+  sortTime: true, title: 'KHÁCH HÀNG ĐẶT LỊCH HẸN', dateLabel: 'NGÀY:', logo: '',
+  titleFontSize: 48, dateFontSize: 31, dataFontSize: 24,
   colorHead: '#4472c4', color1: '#cfd5ea', color2: '#e9ebf5', colorText: '#00529c',
   colorTitle: '#ff0000', emptyMessage: 'Hôm nay chưa có lịch hẹn',
   loadErrorMessage: 'Không thể tải dữ liệu từ Google Sheet'
@@ -85,7 +87,9 @@ function cleanScreen(input) {
   result.minRowH = Math.max(30, Number(result.minRowH) || 70);
   result.interval = Math.max(2, Number(result.interval) || 10);
   result.refresh = Math.max(10, Number(result.refresh) || 60);
-  result.fontScale = Math.max(0.5, Number(result.fontScale) || 1);
+  result.titleFontSize = Math.max(12, Number(result.titleFontSize) || 48);
+  result.dateFontSize = Math.max(10, Number(result.dateFontSize) || 31);
+  result.dataFontSize = Math.max(10, Number(result.dataFontSize) || 24);
   result.sortTime = Boolean(result.sortTime);
   return result;
 }
@@ -95,10 +99,12 @@ const validSlug = slug => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && !['admin', 
 async function serveFile(res, file) {
   try {
     const data = await fs.readFile(file);
+    const extension = path.extname(file).toLowerCase();
+    const noCache = ['.html', '.css', '.js'].includes(extension);
     res.writeHead(200, {
-      'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
+      'Content-Type': MIME[extension] || 'application/octet-stream',
       'Content-Length': data.length,
-      'Cache-Control': file.endsWith('.html') ? 'no-store' : 'public, max-age=3600'
+      'Cache-Control': noCache ? 'no-store' : 'public, max-age=3600'
     });
     res.end(data);
   } catch (error) {

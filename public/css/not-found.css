@@ -1,3 +1,5 @@
-body { font-family: system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #f4f7fb; color: #263544; }
+@font-face { font-family: "Myriad Pro"; src: url("/assets/fonts/MyriadPro-Regular.otf") format("opentype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Myriad Pro"; src: url("/assets/fonts/MyriadPro-Bold.otf") format("opentype"); font-weight: 700 900; font-display: swap; }
+body { font-family: "Myriad Pro", "Segoe UI", Arial, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #f4f7fb; color: #263544; }
 .box { text-align: center; padding: 2rem; }
 h1, a { color: #00529c; }
