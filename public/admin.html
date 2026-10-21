@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý màn hình | THACO AUTO</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+  <main id="loginView" class="login-view d-none">
+    <form id="loginForm" class="card border-0 shadow-sm login-card">
+      <div class="card-body p-4 p-md-5">
+        <div class="brand mb-4">THACO AUTO</div>
+        <h1 class="h4 mb-2">Đăng nhập quản trị</h1>
+        <p class="text-secondary mb-4">Quản lý đường dẫn và Google Sheet của từng màn hình.</p>
+        <label for="password" class="form-label">Mật khẩu</label>
+        <input id="password" class="form-control form-control-lg" type="password" autocomplete="current-password" required autofocus>
+        <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Đăng nhập</button>
+      </div>
+    </form>
+  </main>
+
+  <div id="dashboardView" class="d-none">
+    <nav class="navbar bg-white border-bottom sticky-top">
+      <div class="container py-2">
+        <span class="navbar-brand brand mb-0">THACO AUTO</span>
+        <button id="logoutButton" class="btn btn-outline-secondary btn-sm">Đăng xuất</button>
+      </div>
+    </nav>
+    <main class="container py-4 py-lg-5">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+          <h1 class="h3 mb-1">Danh sách màn hình</h1>
+          <p class="text-secondary mb-0">Mỗi đường dẫn tương ứng với một cấu hình trong <code>config.json</code>.</p>
+        </div>
+        <button id="addButton" class="btn btn-primary">+ Thêm màn hình</button>
+      </div>
+      <div id="emptyState" class="card border-0 shadow-sm text-center p-5 d-none">
+        <p class="text-secondary mb-3">Chưa có màn hình nào.</p>
+        <button class="btn btn-primary mx-auto" data-action="add">Tạo màn hình đầu tiên</button>
+      </div>
+      <div id="screenList" class="row g-3"></div>
+    </main>
+  </div>
+
+  <div class="modal fade" id="screenModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <form id="screenForm" class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle" class="modal-title fs-5">Thêm màn hình</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <input id="originalSlug" type="hidden">
+          <section class="form-section">
+            <h3>Thông tin chính</h3>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label" for="name">Tên màn hình</label><input class="form-control" id="name" required placeholder="THACO Hải Phòng 01"></div>
+              <div class="col-md-6"><label class="form-label" for="slug">Đường dẫn</label><div class="input-group"><span class="input-group-text">/</span><input class="form-control" id="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="thaco-hai-phong-01"></div><div class="form-text">Chỉ dùng chữ thường không dấu, số và dấu gạch ngang.</div></div>
+              <div class="col-md-8"><label class="form-label" for="sheetUrl">Link Google Sheet</label><input class="form-control" id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+              <div class="col-md-4"><label class="form-label" for="sheetName">Tên sheet (tab)</label><input class="form-control" id="sheetName" value="LichHen"></div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h3>Hiển thị và dữ liệu</h3>
+            <div class="row g-3">
+              <div class="col-md-4"><label class="form-label" for="mode">Số dòng mỗi trang</label><select class="form-select" id="mode"><option value="auto">Tự động theo màn hình</option><option value="fixed">Cố định</option></select></div>
+              <div class="col-md-4"><label class="form-label" for="pageSize">Số dòng cố định</label><input class="form-control" id="pageSize" type="number" min="1"></div>
+              <div class="col-md-4"><label class="form-label" for="minRowH">Chiều cao dòng tối thiểu (px)</label><input class="form-control" id="minRowH" type="number" min="30"></div>
+              <div class="col-md-4"><label class="form-label" for="interval">Chuyển trang sau (giây)</label><input class="form-control" id="interval" type="number" min="2"></div>
+              <div class="col-md-4"><label class="form-label" for="refresh">Tải lại Sheet sau (giây)</label><input class="form-control" id="refresh" type="number" min="10"></div>
+              <div class="col-md-4"><label class="form-label" for="anim">Hiệu ứng</label><select class="form-select" id="anim"><option value="slide">Cuộn lên</option><option value="fade">Mờ dần</option><option value="none">Không hiệu ứng</option></select></div>
+              <div class="col-md-4"><label class="form-label" for="dateMode">Lọc theo ngày</label><select class="form-select" id="dateMode"><option value="today">Hôm nay</option><option value="date">Ngày cố định</option><option value="all">Tất cả</option></select></div>
+              <div class="col-md-4"><label class="form-label" for="date">Ngày cố định</label><input class="form-control" id="date" type="date"></div>
+              <div class="col-md-4 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" id="sortTime" type="checkbox"><label class="form-check-label" for="sortTime">Sắp xếp theo giờ hẹn</label></div></div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h3>Nội dung</h3>
+            <div class="row g-3">
+              <div class="col-md-8"><label class="form-label" for="title">Tiêu đề</label><input class="form-control" id="title"></div>
+              <div class="col-md-4"><label class="form-label" for="dateLabel">Nhãn ngày</label><input class="form-control" id="dateLabel"></div>
+              <div class="col-md-8"><label class="form-label" for="logo">Link ảnh logo</label><input class="form-control" id="logo" type="url"></div>
+              <div class="col-md-4"><label class="form-label" for="fontScale">Tỉ lệ cỡ chữ</label><input class="form-control" id="fontScale" type="number" min="0.5" step="0.1"></div>
+              <div class="col-md-6"><label class="form-label" for="emptyMessage">Thông báo khi không có lịch</label><input class="form-control" id="emptyMessage"></div>
+              <div class="col-md-6"><label class="form-label" for="loadErrorMessage">Thông báo khi lỗi Sheet</label><input class="form-control" id="loadErrorMessage"></div>
+            </div>
+          </section>
+
+          <section class="form-section mb-0">
+            <h3>Màu sắc</h3>
+            <div class="row g-3">
+              <div class="col-6 col-md"><label class="form-label" for="colorHead">Đầu bảng</label><input class="form-control form-control-color w-100" id="colorHead" type="color"></div>
+              <div class="col-6 col-md"><label class="form-label" for="color1">Dòng lẻ</label><input class="form-control form-control-color w-100" id="color1" type="color"></div>
+              <div class="col-6 col-md"><label class="form-label" for="color2">Dòng chẵn</label><input class="form-control form-control-color w-100" id="color2" type="color"></div>
+              <div class="col-6 col-md"><label class="form-label" for="colorText">Chữ</label><input class="form-control form-control-color w-100" id="colorText" type="color"></div>
+              <div class="col-6 col-md"><label class="form-label" for="colorTitle">Tiêu đề</label><input class="form-control form-control-color w-100" id="colorTitle" type="color"></div>
+            </div>
+          </section>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+          <button id="saveButton" type="submit" class="btn btn-primary">Lưu &amp; áp dụng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="appToast" class="toast border-0" role="status"><div id="toastBody" class="toast-body"></div></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/admin.js" defer></script>
+</body>
+</html>

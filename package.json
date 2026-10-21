@@ -1,0 +1,12 @@
+{
+  "name": "thaco-appointment-board",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Màn hình lịch hẹn THACO với trang quản trị theo đường dẫn",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": { "node": ">=18" }
+}
