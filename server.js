@@ -1,15 +1,21 @@
-'use strict';
+import http from 'node:http';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import {
+  createSession,
+  deleteSession,
+  readConfig,
+  refreshSession,
+  writeConfig
+} from './database.js';
 
-const http = require('node:http');
-const fs = require('node:fs/promises');
-const path = require('node:path');
-const crypto = require('node:crypto');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const PORT = Number(process.env.PORT) || 8080;
 const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const CONFIG_FILE = path.join(__dirname, 'config.json');
-const sessions = new Map();
 const SESSION_AGE = 12 * 60 * 60 * 1000;
 
 const MIME = {
@@ -28,18 +34,6 @@ const DEFAULT_SCREEN = {
   colorTitle: '#ff0000', emptyMessage: 'Hôm nay chưa có lịch hẹn',
   loadErrorMessage: 'Không thể tải dữ liệu từ Google Sheet'
 };
-
-async function readConfig() {
-  const data = JSON.parse(await fs.readFile(CONFIG_FILE, 'utf8'));
-  data.screens = Array.isArray(data.screens) ? data.screens : [];
-  return data;
-}
-
-async function writeConfig(data) {
-  const temp = `${CONFIG_FILE}.tmp`;
-  await fs.writeFile(temp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
-  await fs.rename(temp, CONFIG_FILE);
-}
 
 function sendJson(res, status, value) {
   const body = JSON.stringify(value);
@@ -65,15 +59,9 @@ function getCookies(req) {
   }));
 }
 
-function isAuthenticated(req) {
+async function isAuthenticated(req) {
   const token = getCookies(req).thaco_session;
-  const expires = token && sessions.get(token);
-  if (!expires || expires < Date.now()) {
-    if (token) sessions.delete(token);
-    return false;
-  }
-  sessions.set(token, Date.now() + SESSION_AGE);
-  return true;
+  return refreshSession(token, Date.now() + SESSION_AGE);
 }
 
 function cleanScreen(input) {
@@ -124,14 +112,14 @@ async function handleApi(req, res, pathname) {
       return sendJson(res, 401, { error: 'Mật khẩu không đúng' });
     }
     const token = crypto.randomBytes(32).toString('hex');
-    sessions.set(token, Date.now() + SESSION_AGE);
+    await createSession(token, Date.now() + SESSION_AGE);
     res.setHeader('Set-Cookie', `thaco_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_AGE / 1000}`);
     return sendJson(res, 200, { ok: true });
   }
 
   if (pathname === '/api/admin/logout' && req.method === 'POST') {
     const token = getCookies(req).thaco_session;
-    if (token) sessions.delete(token);
+    await deleteSession(token);
     res.setHeader('Set-Cookie', 'thaco_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');
     return sendJson(res, 200, { ok: true });
   }
@@ -143,7 +131,7 @@ async function handleApi(req, res, pathname) {
     return screen ? sendJson(res, 200, cleanScreen(screen)) : sendJson(res, 404, { error: 'Đường dẫn màn hình không tồn tại' });
   }
 
-  if (!isAuthenticated(req)) return sendJson(res, 401, { error: 'Bạn chưa đăng nhập' });
+  if (!await isAuthenticated(req)) return sendJson(res, 401, { error: 'Bạn chưa đăng nhập' });
 
   if (pathname === '/api/admin/screens' && req.method === 'GET') {
     const config = await readConfig();

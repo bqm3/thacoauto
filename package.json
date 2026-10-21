@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "description": "Màn hình lịch hẹn THACO với trang quản trị theo đường dẫn",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "engines": { "node": ">=18" }
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@vercel/functions": "^3.10.2",
+    "mongodb": "^7.7.0"
+  }
 }
